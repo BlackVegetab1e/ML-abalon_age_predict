@@ -64,25 +64,41 @@ class Trainer():
     def Y_hat(self, X:np.ndarray, theta:np.ndarray)->np.ndarray:
         return np.dot(X, theta)
 
-    def gradient(self, X:np.ndarray, Y:np.ndarray, theta:np.ndarray)->np.ndarray:
+    def gradient(self, X:np.ndarray, Y:np.ndarray, theta:np.ndarray, lambda_theta)->np.ndarray:
         grad = np.dot(X.T , (self.Y_hat(X, theta) - Y))
+        grad /= X.shape[0]
 
         if self.algo == 'Lasso':
-            pass
+            # 这里务必使用copy，因为np的=传递的是引用，而不是拷贝。
+            theta_of_x = theta.copy()
+            theta_of_x[0,0] = 0
+            for i in range(1,theta_of_x.shape[0]):
+                if theta_of_x[i,0] > 0:
+                    theta_of_x[i,0] = 1
+                else:
+                    theta_of_x[i,0] = -1
+            grad += lambda_theta * theta_of_x
+
         elif self.algo == 'Ridge':
-            pass
-        return grad/X.shape[0]
+            theta_of_x = theta.copy()
+            theta_of_x[0,0] = 0
+            # print(grad)
+            # print(theta_of_x)
+            grad += lambda_theta * theta_of_x
+            
+            # print("*******************")
+        return grad
 
     def MSE(self, X:np.ndarray, Y:np.ndarray, theta:np.ndarray)->np.ndarray:
         delta_y = self.Y_hat(X, theta) - Y
 
         return np.mean(np.square(delta_y) )
 
-    def train(self, lr=1e-1, init_theta = np.zeros(9), l_steps = 10000):
+    def train(self, lr=1e-1, init_theta = np.zeros(9), lambda_theta = 0.001, l_steps = 10000):
         # 为了让偏置项与其他的参数写成一个矩阵，这边将一行1
         # 写在X的第一行，这样的话结果直接就是y=theta*x
         # 不需要在计算公式中另外加入偏置项。
-
+        
         X_1 = np.ones((len(self.training_data),1))
     
         X = self.training_data[:, :-1]
@@ -98,7 +114,8 @@ class Trainer():
         for i in range(l_steps):
             if i % 1000 == 0:
                 print("MSE@epoch", i, ":", self.MSE(X, Y, theta))
-            theta = theta - lr * self.gradient(X, Y, theta)
+                # print(theta)
+            theta = theta - lr * self.gradient(X, Y, theta, lambda_theta)
 
         print(theta)
             
@@ -114,9 +131,10 @@ if __name__ == "__main__":
     data = dataLoader('C:\\Users\\Haoyu\\Desktop\\研一\\ML\\HomeWork1\\Data\\abalone.data')
     training_data, test_data = data.data_cut(10, 9)
 
-    algo = "Ridge"
     
-
+    algo = "Linear"
+    algo = "Lasso"
+    algo = "Ridge"
     t = Trainer(training_data, test_data, algo)
     t.train()
     
