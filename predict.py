@@ -49,10 +49,31 @@ class dataLoader():
 
         return training_data, test_data
     
-    def normalization(self, type):
-        pass
-    
 
+    def normalization(self, type = None):
+        # 各种正则化方法，需要注意的是，一个程序只能用一次，不能重复使用两个
+        # emm确实有点不合理,但是就这样吧 
+        if type == None:
+            return
+        elif type == 'MinMax':
+            min_col = np.min(self.datas, axis=0)
+            max_col = np.max(self.datas, axis=0)
+            
+            for i in range(self.datas[0].shape[0]-1):
+                self.datas[:,i] = (self.datas[:,i] - min_col[i])/(max_col[i] - min_col[i])
+            
+        elif type == 'Mean':
+            min_col = np.min(self.datas, axis=0)
+            max_col = np.max(self.datas, axis=0)
+            mean_col = np.mean(self.datas, axis=0)
+            for i in range(self.datas[0].shape[0]-1):
+                self.datas[:,i] = (self.datas[:,i] - mean_col[i])/(max_col[i] - min_col[i])
+
+        elif type == 'Standardization':
+            var_col = np.mean(self.datas, axis=0)
+            mean_col = np.mean(self.datas, axis=0)
+            for i in range(self.datas[0].shape[0]-1):
+                self.datas[:,i] = (self.datas[:,i] - mean_col[i])/var_col[i]
 
 
 
@@ -60,6 +81,7 @@ class dataLoader():
 class Trainer():
 # 传入参数包含有切分好的数据集与训练集
 # algo：使用线性回归，岭回归，或者是Lasso回归，三选一，输入字符串，默认为线性回归
+
 
     def __init__(self, training_data:np.ndarray, test_data:np.ndarray, algo:str = "Linear"):
         self.training_data = training_data
@@ -128,10 +150,8 @@ class Trainer():
         print(theta)
         return theta
             
-    def test(self, theta):
-        
-        
 
+    def test(self, theta):
         X_1 = np.ones((len(self.test_data),1))
     
         X = self.test_data[:, :-1]
@@ -142,6 +162,8 @@ class Trainer():
 
         print("MSELoss@:", self.MSE(X, Y, theta))
     
+
+
     def LWLR_Test(self, k):
         X_1 = np.ones((len(self.training_data),1))
         X = self.training_data[:, :-1]
@@ -189,25 +211,38 @@ class Trainer():
 
 
 if __name__ == "__main__":
-    # data = dataLoader('./Data/abalone.data')
-    
-    data = dataLoader('C:\\Users\\Haoyu\\Desktop\\研一\\ML\\HomeWork1\\Data\\abalone.data')
-    training_data, test_data = data.data_cut(10, 9)
 
-    
+
+    lr=1e-1
+    init_theta = np.zeros(9)
+    lambda_theta = 0.001
+    l_steps = 5000
+
+    data_path = './Data/abalone.data'
+
     algo = "Linear"
     algo = "Lasso"
     # algo = "Ridge"
-    algo = "LWLR"
+    # algo = "LWLR"
+    normization_type = 'MinMax'
+    normization_type = 'Mean'
+    normization_type = 'Standardization'
+    normization_type = None
+    LWLR_k = 0.16
+
+
+
+    data = dataLoader(data_path)
+    data.normalization(normization_type)
+    training_data, test_data = data.data_cut(10, 9)
+
+
     t = Trainer(training_data, test_data, algo)
     if algo == 'LWLR':
-        init_k = 0.1
-        for i in range(40):
-            k = init_k + i * 0.01
-            print(k,':')
-            t.LWLR_Test(k)
+        t.LWLR_Test(LWLR_k)
     else:
-        theta = t.train()
+        theta = t.train(lr=lr, init_theta=init_theta , \
+                        lambda_theta=lambda_theta , l_steps=l_steps )
         t.test(theta)
     
     
