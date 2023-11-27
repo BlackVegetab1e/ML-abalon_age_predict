@@ -195,10 +195,11 @@ if __name__ == "__main__":
     training_data, test_data = data.data_cut(10, 9)
 
     
-    algo = "Linear"
+    
     algo = "Lasso"
     # algo = "Ridge"
     algo = "LWLR"
+    algo = "Linear"
     t = Trainer(training_data, test_data, algo)
     if algo == 'LWLR':
         init_k = 0.1
