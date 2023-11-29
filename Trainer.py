@@ -68,7 +68,7 @@ class Trainer():
             if i % 1000 == 0:
                 print("MSE@epoch", i, ":", self.MSE(X, Y, theta))
                 # print(theta)
-            writer.add_scalars('loss', {lables ,self.MSE(X, Y, theta)}, l_steps)
+            writer.add_scalars('loss', {lables :self.MSE(X, Y, theta)}, i)
             theta = theta - lr * self.gradient(X, Y, theta, lambda_theta)
 
         print(theta)
@@ -85,6 +85,7 @@ class Trainer():
         # print(Y)
 
         print("MSELoss@:", self.MSE(X, Y, theta))
+        return self.MSE(X, Y, theta)
     
 
 
@@ -127,7 +128,8 @@ class Trainer():
            
             MSE_LWLR += (y_hat_single - Y_test[x_i])**2
 
-        print(MSE_LWLR/X_test.shape[0])
+        print(k,':',MSE_LWLR/X_test.shape[0])
+        return MSE_LWLR/X_test.shape[0]
 
  
         
