@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
 
     lr=1e-2
-    init_theta = np.zeros(9)
+    init_theta = np.zeros((11,1))
     lambda_theta = 1e-3
     l_steps = 5000
 
