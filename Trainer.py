@@ -58,7 +58,7 @@ class Trainer():
         Y = self.training_data[:, -1].reshape(-1,1)
         X = np.hstack((X_1, X))
 
-        theta = np.zeros((len(X[0]),1))
+        theta = init_theta
         # print(self.gradient(X, Y, theta))
 
         # print(self.MSE(X, Y, theta))

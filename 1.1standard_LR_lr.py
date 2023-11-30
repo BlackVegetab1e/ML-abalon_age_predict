@@ -40,8 +40,9 @@ if __name__ == "__main__":
             MSE_origin[j][i] = trainer_origin.test(theta_origin)
        
 
+    for i in range(10):
         
-    print(MSE_origin.mean())
+        print(MSE_origin[i].mean())
 
 
         
